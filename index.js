@@ -39,12 +39,15 @@ let followers = document.querySelector('#followers');
 let following = document.querySelector('#following');
 let num_repos = document.querySelector('#num_repos');
 let avatar = document.querySelector('#avatar');
-
+let card = document.querySelector('.card');
 
 let form = document.querySelector('#form');
 
 form.addEventListener('submit',(e)=>{
+   
     e.preventDefault();
+    card.style.visibility="hidden"
+    document.querySelector('.repo').innerHTML=" ";
     let user = form[0].value;
     profile(user);
     get_repos(user);
@@ -55,14 +58,24 @@ async function profile(username){
     const res = await fetch(`https://api.github.com/users/${username}`);
     const data = await res.json();
     let user_info = data;
-    name.innerHTML = `${user_info.name}<br>created at:${user_info.created_at.substring(0,10)}`;
-    created_at.innerText = user_info.created_at;
-    followers.innerText = `Followers:${user_info.followers}`;
-    // followers.innerHTML = `<p>Followers:${user_info.followers}<h3>`;
-    // followers.innerHTML = `<p>Followers:${user_info.followers}<h3>`;
-    // followers.innerHTML = `<p>Followers:${user_info.followers}<h3>`;
-    // followers.innerHTML = `<p>Followers:${user_info.followers}<h3>`;
-   
+    if(data.message==="Not Found"){
+        card.style.visibility="hidden"
+        alert("Invalid username");
+
+    }
+    else{
+    if(user_info.name===null){
+         name.innerHTML="";
+    }
+    else{
+    name.innerHTML = `${user_info.name}<br><a href="${user_info.html_url}">${user_info.login}</a>`;
+    }
+    avatar.setAttribute('src', user_info.avatar_url)
+    followers.innerHTML = `Followers:${user_info.followers}`;
+    following.innerHTML = `Following:${user_info.following}`;
+    num_repos.innerHTML = `Number of repositories:${user_info.public_repos}`;
+    card.style.visibility="visible"
+}
 }
 
 // profile();
@@ -71,8 +84,23 @@ async function get_repos(username){
     const res = await fetch(`https://api.github.com/users/${username}/repos`);
     const data = await res.json();
     let repos = data;
-
+    repos.innerHTML="";
+    
     repos.forEach(repo=>{
-        console.log(repo.name)
+        let repos = document.querySelector('.repo'); 
+        const link = document.createElement('a');
+        link.setAttribute('href',`${repo.html_url}`);
+        const button = document.createElement('button');
+        button.innerText=`${repo.name}`;
+        link.appendChild(button);
+        
+        // let repo_card = `
+        //     <a href="${repo.html_url}"><button>${repo.name}</button></a>
+        // `;
+          
+        repos.appendChild(link);
+        
+        // repos.append(repo_card.innerHTML);
+        console.log(repo)
     })
 }
